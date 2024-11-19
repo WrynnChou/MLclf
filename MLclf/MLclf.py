@@ -276,26 +276,24 @@ class MLclf():
     @staticmethod
     def _feature_norm(feature, transform=None):
         """
-        This function transform the dimension of feature from (batch_size, H, W, C) to (batch_size, C, H, W).
+        This function transforms the dimension of feature from (batch_size, H, W, C) to (batch_size, C, H, W).
         :param feature: feature / mini-imagenet's images.
         :return: transformed feature.
         """
-        #
         if transform is None:
             # convert a PIL image to tensor (H*W*C) in range [0,255] to a torch.Tensor(C*H*W) in the range [0.0,1.0]
             transform = transforms.Compose([transforms.ToTensor()])
-            print('The argument transform is None, so only tensor converted and normalization b/t [0,1] is done!')
-            # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-            # print('transforms is predefined as None, so the default transforms is called: ', transform)
+            print('The argument transform is None, so only tensor conversion and normalization between [0,1] is done!')
         else:
             transform = transform
-        feature_shape = np.shape(feature)
-        feature_output = torch.empty((feature_shape[0], feature_shape[3], feature_shape[1], feature_shape[2]))
+
+        feature_output = []
+        
         for i, feature_i in enumerate(feature):
-            feature_output[i] = transform(feature_i)
-            # feature is a tensor here.
-        # print('type(feature_output): ', type(feature_output))
-        return feature_output.numpy()
+            transformed_feature = transform(feature_i)
+            feature_output.append(transformed_feature)  # Move the channel dimension to the correct position
+        
+        return torch.stack(feature_output).numpy()
 
 
     @staticmethod
